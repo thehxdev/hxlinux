@@ -10,5 +10,5 @@ apt-get update && apt-get install curl
 
 ### Run
 ```bash
-bash <(curl -L https://github.com/thehxdev/hxlinux/raw/main/hxlinux.sh)
+bash <(curl -sfSL https://github.com/thehxdev/hxlinux/raw/main/hxlinux.sh)
 ```
