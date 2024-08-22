@@ -167,7 +167,8 @@ function install_golang() {
 			;;
 	esac
 
-	curl -LsSf -o "$tmpdir/$file_name" "https://go.dev/dl/$file_name"
+	log_info "downloading archive file to $tmpdir/$file_name"
+	curl -LSf -o "$tmpdir/$file_name" "https://go.dev/dl/$file_name"
 	if [[ $? != 0 ]]; then
 		log_error "failed to download Golang compiler"
 		return
