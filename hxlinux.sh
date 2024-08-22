@@ -25,15 +25,15 @@ BANNER='
 
 
 function log_error() {
-	echo -e "${RED}[ERROR]" "$*" "${NC}"
+	echo -e "${RED}[ERROR]" "$@" "${NC}"
 }
 
 function log_info() {
-	echo -e "${GREEN}[INFO]" "$*" "${NC}"
+	echo -e "${GREEN}[INFO]" "$@" "${NC}"
 }
 
 function log_warn() {
-	echo -e "${YELLOW}[WARN]" "$*" "${NC}"
+	echo -e "${YELLOW}[WARN]" "$@" "${NC}"
 }
 
 function install_pkgs() {
