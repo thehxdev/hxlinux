@@ -37,6 +37,8 @@ function log_warn() {
 }
 
 function install_pkgs() {
+	log_info "installing $@"
+	sleep 1
 	apt-get install $@ -y
 	if [[ $? != 0 ]]; then
 		log_error "failed to install ($@) packages"
@@ -183,6 +185,60 @@ function install_golang() {
 	log_info "dont forget to add $install_path/go/bin to your PATH environment variable"
 }
 
+function install_flatpak() {
+	log_info "installing flatpak"
+	install_pkgs flatpak xdg-desktop-portal xdg-desktop-portal-gtk xdg-user-dirs xdg-utils
+	if [[ $? != 0 ]]; then
+		log_error "failed to install flatpak"
+		return
+	fi
+
+ 	flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+	log_info "flatpak installed. restart your computer..."
+}
+
+function install_bottles() {
+	if ! command -v flatpak &>/dev/null; then
+		log_error "flatpak is not installed. install flatpak with this script and restart your computer then try again..."
+		exit 1
+	fi
+
+	flatpak install flathub com.usebottles.bottles
+	if [[ $? != 0 ]]; then
+		log_error "failed to install bottles"
+		exit 1
+	fi
+}
+
+function install_themes_and_icons() {
+	log_info "cloning kali-themes repository from gitlab"
+	git clone --depth=1 --branch=kali/master 'https://gitlab.com/kalilinux/packages/kali-themes.git'
+	if [[ $? != 0 ]]; then
+		log_error "failed to clone kali-themes repository"
+		exit 1
+	fi
+
+	local base_dir
+	base_dir="/usr/share"
+
+	mkdir -p /usr/share/{themes,icons}
+
+	cp -rv ./kali-themes/share/themes/* $base_dir/themes
+	if [[ $? != 0 ]]; then
+		log_error "failed to copy theme files"
+		exit 1
+	fi
+
+	cp -rv ./kali-themes/share/icons/* $base_dir/icons
+	if [[ $? != 0 ]]; then
+		log_error "failed to copy icon files"
+		exit 1
+	fi
+
+	log_info "installed kali-themes (gtk) and icon themes"
+	rm -rf ./kali-themes
+}
+
 function server_menu() {
 	clear
 	echo -e "${GREEN}1. Install Xray-Core${NC}"
@@ -233,6 +289,34 @@ function server_menu() {
 
 function desktop_menu() {
 	clear
+	echo -e "${GREEN}1. Install Flatpak${NC}"
+	echo -e "${GREEN}2. Install Bottles (To install and run Windows programs)${NC}"
+	echo -e "${GREEN}3. Install Themes and Icons${NC}"
+	echo -e "${GREEN}4. Main Menu${NC}"
+	echo -e "${YELLOW}5. Exit${NC}"
+
+	read -rp "Enter an Option: " menu_option
+	case $menu_option in
+		1)
+			install_flatpak
+			;;
+		2)
+			install_bottles
+			;;
+		3)
+			install_themes_and_icons
+			;;
+		4)
+			main_menu
+			;;
+		5)
+			exit 0
+			;;
+		*)
+			log_error "Invalid Option. Run script again!"
+			exit 1
+			;;
+	esac
 }
 
 function dev_menu() {
@@ -277,9 +361,7 @@ function main_menu() {
 			server_menu
 			;;
 		2)
-			# desktop_menu
-			# TODO: desktop menu
-			log_warn "not implemented"
+			desktop_menu
 			exit 1
 			;;
 		3)
