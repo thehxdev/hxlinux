@@ -89,7 +89,7 @@ function install_xui() {
 
 function install_xray_core() {
 	# Use official script to install Xray-Core
-	bash -c "$(curl -L https://github.com/XTLS/Xray-install/raw/main/install-release.sh)" @ install
+	bash -c "$(curl -Ls https://github.com/XTLS/Xray-install/raw/main/install-release.sh)" @ install
 	exit $?
 }
 
@@ -175,8 +175,9 @@ function server_menu() {
 	echo -e "${GREEN}2. Install Sing-Box${NC}"
 	echo -e "${GREEN}3. Install Hysteria2${NC}"
 	echo -e "${GREEN}4. Install ACME Script${NC}"
-	echo -e "${GREEN}5. Main Menu${NC}"
-	echo -e "${YELLOW}6. Exit${NC}"
+	echo -e "${GREEN}5. Install X-UI Panel${NC}"
+	echo -e "${GREEN}6. Main Menu${NC}"
+	echo -e "${YELLOW}7. Exit${NC}"
 
 	read -rp "Enter an Option: " menu_option
 	case $menu_option in
@@ -193,9 +194,12 @@ function server_menu() {
 			install_acme_script
 			;;
 		5)
-			main_menu
+			install_xui
 			;;
 		6)
+			main_menu
+			;;
+		7)
 			exit 0
 			;;
 		*)
