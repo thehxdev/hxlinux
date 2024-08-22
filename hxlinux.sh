@@ -81,6 +81,19 @@ function install_xcaddy() {
 	log_info "installed xcaddy to $GOPATH/xcaddy"
 }
 
+function install_caddy() {
+	# From official installation docs
+	# https://caddyserver.com/docs/install#debian-ubuntu-raspbian
+
+	install_pkgs debian-keyring debian-archive-keyring apt-transport-https
+
+	curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' | gpg --dearmor -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg
+	curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt' | tee /etc/apt/sources.list.d/caddy-stable.list
+
+	apt-get update
+	install_pkgs caddy
+}
+
 function install_xui() {
 	# Use official script to install x-ui panel
 	bash <(curl -Ls https://raw.githubusercontent.com/alireza0/x-ui/master/install.sh)
@@ -176,9 +189,10 @@ function server_menu() {
 	echo -e "${GREEN}3. Install Hysteria2${NC}"
 	echo -e "${GREEN}4. Install ACME Script${NC}"
 	echo -e "${GREEN}5. Install X-UI Panel${NC}"
-	echo -e "${GREEN}6. Install xcaddy${NC}"
-	echo -e "${GREEN}7. Main Menu${NC}"
-	echo -e "${YELLOW}8. Exit${NC}"
+	echo -e "${GREEN}6. Install caddy${NC}"
+	echo -e "${GREEN}7. Install xcaddy${NC}"
+	echo -e "${GREEN}8. Main Menu${NC}"
+	echo -e "${YELLOW}9. Exit${NC}"
 
 	read -rp "Enter an Option: " menu_option
 	case $menu_option in
@@ -198,12 +212,15 @@ function server_menu() {
 			install_xui
 			;;
 		6)
-			install_xcaddy
+			install_caddy
 			;;
 		7)
-			main_menu
+			install_xcaddy
 			;;
 		8)
+			main_menu
+			;;
+		9)
 			exit 0
 			;;
 		*)
