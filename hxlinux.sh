@@ -99,25 +99,21 @@ function install_caddy() {
 function install_xui() {
 	# Use official script to install x-ui panel
 	bash <(curl -Ls https://raw.githubusercontent.com/alireza0/x-ui/master/install.sh)
-	exit $?
 }
 
 function install_xray_core() {
 	# Use official script to install Xray-Core
 	bash -c "$(curl -Ls https://github.com/XTLS/Xray-install/raw/main/install-release.sh)" @ install
-	exit $?
 }
 
 function install_singbox_core() {
 	# Use official script to install sing-box
 	bash <(curl -fsSL https://sing-box.app/deb-install.sh)
-	exit $?
 }
 
 function install_hysteria2() {
 	# Use official script to install hysteria2
 	bash <(curl -fsSL https://get.hy2.sh/)
-	exit $?
 }
 
 function install_acme_script() {
