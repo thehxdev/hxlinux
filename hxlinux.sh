@@ -37,11 +37,10 @@ function log_warn() {
 }
 
 function install_pkgs() {
-	log_info "installing $@"
+	log_info "installing $*"
 	sleep 1
-	apt-get install $@ -y
-	if [[ $? != 0 ]]; then
-		log_error "failed to install ($@) packages"
+	if ! apt-get install "$@" -y; then
+		log_error "failed to install ($*) packages"
 	fi
 }
 
@@ -49,19 +48,19 @@ function install_dependencies() {
 	local commands
 	local to_install
 
-	commands=($@)
+	commands=("$@")
 	to_install=()
 
 	log_info "checking needed commands"
-	for cmd in ${commands[@]}; do
-		if ! command -v $cmd &>/dev/null; then
-			to_install+=($cmd)
+	for cmd in "${commands[@]}"; do
+		if ! command -v "$cmd" &>/dev/null; then
+			to_install+=("$cmd")
 		fi
 	done
 
-	if [[ ${#to_install[@]} > 0 ]]; then
-		log_info "installing missing commands (${to_install[@]})"
-		install_pkgs ${to_install[@]}
+	if [[ ${#to_install[@]} -gt 0 ]]; then
+		log_info "installing missing commands (${to_install[*]})"
+		install_pkgs "${to_install[@]}"
 	fi
 }
 
@@ -73,8 +72,7 @@ function install_xcaddy() {
 		install_golang
 	fi
 
-	$go_cmd install github.com/caddyserver/xcaddy/cmd/xcaddy@latest
-	if [[ $? != 0 ]]; then
+	if ! $go_cmd install github.com/caddyserver/xcaddy/cmd/xcaddy@latest; then
 		log_error "failed to install xcaddy"
 		exit 1
 	fi
@@ -120,12 +118,11 @@ function install_acme_script() {
 	local dependencies
 
 	dependencies=(socat)
-	install_dependencies ${dependencies[@]}
+	install_dependencies "${dependencies[@]}"
 
-	bash <(curl -fsSL https://get.acme.sh)
-	if [[ $? != 0 ]]; then
+	if ! bash <(curl -fsSL https://get.acme.sh); then
 		log_error "failed to install acme script"
-		log_error "installed dependencies for acme: ${dependencies[@]}"
+		log_error "installed dependencies for acme: ${dependencies[*]}"
 		exit 1
 	fi
 
@@ -166,8 +163,7 @@ function install_golang() {
 	esac
 
 	log_info "downloading archive file to $tmpdir/$file_name"
-	curl -LSf -o "$tmpdir/$file_name" "https://go.dev/dl/$file_name"
-	if [[ $? != 0 ]]; then
+	if ! curl -LSf -o "$tmpdir/$file_name" "https://go.dev/dl/$file_name"; then
 		log_error "failed to download Golang compiler"
 		return
 	fi
@@ -183,8 +179,7 @@ function install_golang() {
 
 function install_flatpak() {
 	log_info "installing flatpak"
-	install_pkgs flatpak xdg-desktop-portal xdg-desktop-portal-gtk xdg-user-dirs xdg-utils
-	if [[ $? != 0 ]]; then
+	if ! install_pkgs flatpak xdg-desktop-portal xdg-desktop-portal-gtk xdg-user-dirs xdg-utils; then
 		log_error "failed to install flatpak"
 		return
 	fi
@@ -199,8 +194,7 @@ function install_bottles() {
 		exit 1
 	fi
 
-	flatpak install flathub com.usebottles.bottles
-	if [[ $? != 0 ]]; then
+	if ! flatpak install flathub com.usebottles.bottles; then
 		log_error "failed to install bottles"
 		exit 1
 	fi
@@ -208,8 +202,7 @@ function install_bottles() {
 
 function install_themes_and_icons() {
 	log_info "cloning kali-themes repository from gitlab"
-	git clone --depth=1 --branch=kali/master 'https://gitlab.com/kalilinux/packages/kali-themes.git'
-	if [[ $? != 0 ]]; then
+	if ! git clone --depth=1 --branch=kali/master 'https://gitlab.com/kalilinux/packages/kali-themes.git'; then
 		log_error "failed to clone kali-themes repository"
 		exit 1
 	fi
@@ -219,14 +212,12 @@ function install_themes_and_icons() {
 
 	mkdir -p /usr/share/{themes,icons}
 
-	cp -rv ./kali-themes/share/themes/* $base_dir/themes
-	if [[ $? != 0 ]]; then
+	if ! cp -rv ./kali-themes/share/themes/* $base_dir/themes; then
 		log_error "failed to copy theme files"
 		exit 1
 	fi
 
-	cp -rv ./kali-themes/share/icons/* $base_dir/icons
-	if [[ $? != 0 ]]; then
+	if ! cp -rv ./kali-themes/share/icons/* $base_dir/icons; then
 		log_error "failed to copy icon files"
 		exit 1
 	fi
@@ -385,7 +376,7 @@ function main() {
 	fi
 
 	base_dependencies=(git unzip)
-	install_dependencies ${base_dependencies[@]}
+	install_dependencies "${base_dependencies[@]}"
 
 	main_menu
 }
